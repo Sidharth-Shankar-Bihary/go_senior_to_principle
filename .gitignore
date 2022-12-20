@@ -1,0 +1,7 @@
+dist/
+vendor
+.idea
+.vscode/
+.golangci.toml
+.pre-commit-config.yaml
+.config.yaml

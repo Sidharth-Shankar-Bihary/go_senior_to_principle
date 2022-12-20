@@ -1,0 +1,37 @@
+[run]
+skip-dirs = ["vendor"]
+
+[linters]
+enable = ["gocritic", "stylecheck", "gci", "exportloopref"]
+
+[linters-settings.gocritic]
+enabled-tags = [
+    "style",
+    "diagnostic",
+    "performance",
+]
+
+disabled-checks = [
+    "unnamedResult",
+    "paramTypeCombine",
+    "ifElseChain",
+    "unlabelStmt",
+]
+
+[linters-settings.govet]
+check-shadowing = true
+
+[issues]
+[[issues.exclude-rules]]
+path = "test\\.go"
+linters = ["scopelint"]
+text = 'range scope `tt` in' # for table tests
+
+[[issues.exclude-rules]]
+path = "test\\.go"
+linters = ["stylecheck"]
+text = 'ST1003: should not use underscores in Go names'
+
+[[issues.exclude-rules]]
+linters = ["ststructcheck","unusedylecheck"]
+text = '`noCopy` is unused'
