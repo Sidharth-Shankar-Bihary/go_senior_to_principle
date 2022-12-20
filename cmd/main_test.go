@@ -1,6 +1,8 @@
-package main
+package cmd
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_sayHello(t *testing.T) {
 	name := "Davy"
