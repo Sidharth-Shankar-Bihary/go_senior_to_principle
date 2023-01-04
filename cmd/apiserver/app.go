@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/ramseyjiang/go_senior_to_principle/internal/db"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/env"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/server"
 	"github.com/ramseyjiang/go_senior_to_principle/pkg/grace"
 )
 
-func Main() {
+func Main(dbType string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	gEnv, err := env.InitEnv(ctx, cancel)
 	if err != nil {
@@ -24,10 +25,10 @@ func Main() {
 
 	log.Println(graceServerList)
 
-	// err = db.InitDB(gEnv, utils.Postgres)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	err = db.InitDB(gEnv, dbType)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	cancel()
 	gEnv.Logger().Info("Server exiting")

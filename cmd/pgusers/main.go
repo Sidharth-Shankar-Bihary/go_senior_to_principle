@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/ramseyjiang/go_senior_to_principle/cmd/apiserver"
+	"github.com/ramseyjiang/go_senior_to_principle/pkg/utils"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 		}
 	}()
 
-	go apiserver.Main()
+	go apiserver.Main(utils.Postgres)
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 	<-stopChan

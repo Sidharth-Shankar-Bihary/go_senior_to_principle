@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUser_Get(t *testing.T) {
+func TestUserModelGet(t *testing.T) {
 	userModel := NewUser()
 	uid := uint64(0) // When connect to db, should use uid gather than 0, and test more about first name, and so on.
 	userInfo, err := userModel.Get(uid)

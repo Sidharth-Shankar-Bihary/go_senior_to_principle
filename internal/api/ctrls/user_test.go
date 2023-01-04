@@ -13,8 +13,7 @@ func TestGetUser(t *testing.T) {
 					"created_at":"0001-01-01T00:00:00Z",
 					"updated_at":"0001-01-01T00:00:00Z",
 					"deleted_at": null,
-					"first_name":"",
-					"last_name":"",
+					"username":"",
 					"address": "",
 					"email":""
 				}

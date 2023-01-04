@@ -1,11 +1,18 @@
 package models
 
+import (
+	"html"
+	"strings"
+
+	"golang.org/x/crypto/bcrypt"
+)
+
 type User struct {
 	Model
-	FirstName string `gorm:"column:first_name" json:"first_name"`
-	LastName  string `gorm:"column:last_name" json:"last_name"`
-	Address   string `gorm:"column:address" json:"address"`
-	Email     string `gorm:"column:email" json:"email"`
+	Username string `gorm:"column:username,size:255;not null;" json:"username"`
+	Password string `gorm:"size:255;not null;" json:"-"`
+	Address  string `gorm:"column:address" json:"address"`
+	Email    string `gorm:"column:email;size:255;not null;unique" json:"email"`
 }
 
 var user User
@@ -13,6 +20,17 @@ var user User
 // NewUser creates a new User
 func NewUser() *User {
 	return &User{}
+}
+
+func (u *User) HashPassword() error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
+	user.Username = html.EscapeString(strings.TrimSpace(user.Username))
+
+	return nil
 }
 
 func (u *User) Get(id uint64) (*User, error) {
