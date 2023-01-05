@@ -14,7 +14,7 @@ func GetUser(c *gin.Context) {
 	id, _ := strconv.ParseUint(c.Param("id"), 10, 64) // Parse ID from URL
 	req := repos.GetUserRequest{ID: id}
 
-	if resp, err := repo.GetUserByID(req); err != nil { // Try to get user from database
+	if resp, err := repo.GetUser(req); err != nil { // Try to get user from database
 		c.AbortWithStatus(http.StatusNotFound) // Abort if not found
 		log.Println(err)
 	} else {

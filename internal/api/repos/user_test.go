@@ -9,16 +9,16 @@ import (
 )
 
 type mockUserRepo struct {
-	UserRepo UserInterface
+	UserRepo User
 }
 
-func TestUserRepo_GetUserByID(t *testing.T) {
+func TestGetUserRepo(t *testing.T) {
 	req := GetUserRequest{ID: 1}
 	realRepo := NewUserRepo()
-	realResp, _ := realRepo.GetUserByID(req)
+	realResp, _ := realRepo.GetUser(req)
 
 	mockRepoUser := newMockUserRepo()
-	mockResp, _ := mockRepoUser.GetUserByID(req)
+	mockResp, _ := mockRepoUser.GetUser(req)
 
 	assert.Equal(t, mockResp, realResp)
 	assert.Equal(t, mockResp.User.ID, realResp.User.ID)
@@ -30,10 +30,10 @@ func newMockUserRepo() *mockUserRepo {
 }
 
 // Mock Get function that replaces real userInterface
-func (m *mockUserRepo) GetUserByID(req GetUserRequest) (*GetUserResponse, error) {
+func (m *mockUserRepo) GetUser(req GetUserRequest) (*GetUserResponse, error) {
 	resp := new(GetUserResponse)
 
-	userServ := new(services.UserService)
+	userServ := new(services.User)
 	user, err := userServ.Get(req.ID)
 	if err != nil {
 		return nil, err

@@ -7,12 +7,12 @@ import (
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/services"
 )
 
-type UserInterface interface {
-	GetUserByID(req GetUserRequest) (*GetUserResponse, error)
+type User interface {
+	GetUser(req GetUserRequest) (*GetUserResponse, error)
 }
 
 type UserRepo struct {
-	UserRepo UserInterface
+	UserRepo User
 }
 
 type GetUserRequest struct {
@@ -30,10 +30,10 @@ func NewUserRepo() *UserRepo {
 	return &UserRepo{}
 }
 
-// GetUserByID just retrieves user using User Model, here can be additional logic for processing data retrieved by Models
-func (u *UserRepo) GetUserByID(req GetUserRequest) (*GetUserResponse, error) {
-	resp := new(GetUserResponse)          // The other way is resp := &GetUserResponse{}
-	userServ := new(services.UserService) // The other way is userServ := &services.UserService{}
+// GetUser just retrieves user using User Model, here can be additional logic for processing data retrieved by Models
+func (u *UserRepo) GetUser(req GetUserRequest) (*GetUserResponse, error) {
+	resp := new(GetUserResponse)   // The other way is resp := &GetUserResponse{}
+	userServ := new(services.User) // The other way is userServ := &services.UserService{}
 
 	// do some logic, then use userService to access data
 	user, err := userServ.Get(req.ID)
