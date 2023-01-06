@@ -2,69 +2,70 @@ package env
 
 import (
 	"context"
+	"log"
 
-	"github.com/ramseyjiang/go_senior_to_principle/pkg/apierrors"
+	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
 	"github.com/ramseyjiang/go_senior_to_principle/pkg/baseenv"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
 type Environment struct {
 	*baseenv.Environment
 	rootCancel context.CancelFunc
-	cfg        *Conf
-	StrErr     *apierrors.StrErrFace
 	Log        *zap.Logger
+	Redis      *redis.Client
+	DB         *gorm.DB
 }
 
-// NewEnv can be used to add more env init, such as kafka, grpc, and so on.
+// NewEnv can be used to add more env init, such as redis, kafka, grpc, and so on.
 func NewEnv(
 	environment *baseenv.Environment,
 	cancel context.CancelFunc,
-	cfg *Conf,
-	strErr *apierrors.StrErrFace,
 	logger *zap.Logger,
+	rds *redis.Client,
+	db *gorm.DB,
 ) *Environment {
 	return &Environment{
 		rootCancel:  cancel,
 		Environment: environment,
-		cfg:         cfg,
-		StrErr:      strErr,
 		Log:         logger,
+		Redis:       rds,
+		DB:          db,
 	}
 }
 
 func InitEnv(ctx context.Context, cancel context.CancelFunc) (gEnv *Environment, err error) {
-	conf, err := provideConf("config.yaml")
+	err = godotenv.Load() // It reads .env file only and directly.
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	closer, err := providerTracer()
 	if err != nil {
 		return nil, err
 	}
 
-	closer, err := providerTracer(conf)
-	if err != nil {
-		return nil, err
-	}
-
-	logger := provideLogger(conf)
+	logger := provideLogger()
 	environment := provideBEnv(ctx, logger)
-	strErr, err := provideErrorHandler()
+
+	rds, err := providerRedis(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	gEnv = NewEnv(environment, cancel, conf, strErr, logger)
+	db, err := provideConnDB()
+	if err != nil {
+		return nil, err
+	}
+
+	gEnv = NewEnv(environment, cancel, logger, rds, db)
 	gEnv.AddCloser(closer)
 
 	return gEnv, nil
 }
 
-func (env *Environment) C() *Conf {
-	return env.cfg
-}
-
 func (env *Environment) L() *zap.Logger {
 	return env.Log
-}
-
-func (env *Environment) Err() *apierrors.StrErrFace {
-	return env.StrErr
 }

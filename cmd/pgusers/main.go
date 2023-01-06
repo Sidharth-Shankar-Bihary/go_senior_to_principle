@@ -1,25 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
+	"context"
+	"log"
 
-	"github.com/ramseyjiang/go_senior_to_principle/cmd/apiserver"
-	"github.com/ramseyjiang/go_senior_to_principle/pkg/utils"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/env"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/server"
+	"github.com/ramseyjiang/go_senior_to_principle/pkg/grace"
 )
 
 func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("recover from main(): [%+v]\n", r)
-		}
-	}()
+	ctx, cancel := context.WithCancel(context.Background())
+	gEnv, err := env.InitEnv(ctx, cancel)
+	if err != nil {
+		log.Fatalf("%+v\n", err)
+	}
 
-	go apiserver.Main(utils.Postgres)
-	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
-	<-stopChan
-	fmt.Printf("main: shutting down server...")
+	graceServerList, err := server.InitServer(gEnv)
+	if err != nil {
+		log.Fatalf("%+v\n", err)
+	}
+	grace.Serve(gEnv.Environment, graceServerList...)
 }

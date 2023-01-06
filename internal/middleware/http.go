@@ -35,8 +35,8 @@ func InjectTracer(e *env.Environment) func(http.Handler) http.Handler {
 
 			// Get TraceID
 			if sc, ok := parentSpan.Context().(jaeger.SpanContext); ok {
+				// use sc.TraceID() to get every trace-id
 				e.Log.With(zap.Any("trace-id", sc.TraceID()))
-				// fmt.Println("trace-id", sc.TraceID())
 			}
 
 			defer parentSpan.Finish()

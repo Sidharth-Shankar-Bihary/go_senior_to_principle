@@ -52,9 +52,9 @@ func (g HTTPGrace) GraceStop(ctx context.Context) error {
 }
 
 type ErrorHandler func(error)
-type Job func() error
+type httpJob func() error
 
-func GoWG(job Job, catch ErrorHandler, wg *sync.WaitGroup) {
+func GoWG(job httpJob, catch ErrorHandler, wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

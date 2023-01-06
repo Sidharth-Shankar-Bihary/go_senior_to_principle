@@ -1,49 +1,36 @@
 package repos
 
 import (
-	"net/http"
-
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
-	"github.com/ramseyjiang/go_senior_to_principle/internal/api/services"
+	"go.uber.org/zap"
 )
 
-type User interface {
-	GetUser(req GetUserRequest) (*GetUserResponse, error)
+var u = models.User{}
+
+func (r *repo) CreateUser(user *models.User) (err error) {
+	if err = u.CreateUser(user, r.db); err != nil {
+		r.logger.Debug("CreateUser ", zap.Any("error: ", err))
+	}
+
+	return nil
 }
 
-type UserRepo struct {
-	UserRepo User
-}
-
-type GetUserRequest struct {
-	ID uint64
-}
-
-type GetUserResponse struct {
-	User   *models.User `json:"user,omitempty"`
-	Err    error        `json:"err,omitempty"`
-	Status int          `json:"status,omitempty"`
-}
-
-// NewUserRepo creates a new NewUserRepo with the given user.
-func NewUserRepo() *UserRepo {
-	return &UserRepo{}
-}
-
-// GetUser just retrieves user using User Model, here can be additional logic for processing data retrieved by Models
-func (u *UserRepo) GetUser(req GetUserRequest) (*GetUserResponse, error) {
-	resp := new(GetUserResponse)   // The other way is resp := &GetUserResponse{}
-	userServ := new(services.User) // The other way is userServ := &services.UserService{}
-
-	// do some logic, then use userService to access data
-	user, err := userServ.Get(req.ID)
+func (r *repo) GetUserByID(id uint) (*models.User, error) {
+	user, err := u.GetUserByID(uint64(id), r.db)
 	if err != nil {
+		r.logger.Debug("GetUserByID ", zap.Any("error: ", err))
 		return nil, err
 	}
 
-	resp.User = user
-	resp.Err = err
-	resp.Status = http.StatusOK
+	return user, nil
+}
 
-	return resp, nil
+func (r *repo) GetUserByName(username string) (*models.User, error) {
+	user, err := u.GetUserByName(username, r.db)
+	if err != nil {
+		r.logger.Debug("GetUserByName ", zap.Any("error: ", err))
+		return nil, err
+	}
+
+	return user, nil
 }

@@ -2,6 +2,7 @@ package grace
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -27,11 +28,12 @@ func Serve(env *baseenv.Environment, services ...Closer) {
 		}
 	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, syscall.SIGINT, syscall.SIGTERM)
 	var ctxClosing context.Context
+	// if necessary, hot reload can be added at here.
 	select {
-	case sig := <-quit:
+	case sig := <-stopChan:
 		logger.Info("Signal received, shutting down server...", zap.String("signal", sig.String()))
 
 		cc, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -46,7 +48,51 @@ func Serve(env *baseenv.Environment, services ...Closer) {
 	}
 
 	for _, service := range services {
-		err := service.GraceStop(ctxClosing)
-		logger.Fatal("failed to stop, err is:" + err.Error())
+		_ = service.GraceStop(ctxClosing)
+	}
+}
+
+type ContextJob func(context.Context) error
+
+func ContextJobGrace(fn ContextJob) Closer {
+	return &contextGrace{fn: fn}
+}
+
+type contextGrace struct {
+	fn      ContextJob
+	cancel  context.CancelFunc
+	errChan <-chan error
+}
+
+func (c *contextGrace) Start() error {
+	if c.cancel != nil {
+		return errors.New("can not start twice")
+	}
+
+	var ctx context.Context
+	ctx, c.cancel = context.WithCancel(context.Background())
+	c.errChan = GoChan(WithContext(ctx, c.fn))
+	return nil
+}
+
+func (c *contextGrace) GraceStop(ctx context.Context) error {
+	c.cancel()
+	return <-c.errChan
+}
+
+type Job func() error
+
+func GoChan(job Job) <-chan error {
+	ch := make(chan error, 1)
+	go func() {
+		ch <- job()
+	}()
+
+	return ch
+}
+
+func WithContext(ctx context.Context, cj ContextJob) Job {
+	return func() error {
+		return cj(ctx)
 	}
 }

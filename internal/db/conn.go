@@ -7,7 +7,7 @@ import (
 
 	"github.com/glebarez/sqlite"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
-	environment "github.com/ramseyjiang/go_senior_to_principle/internal/env"
+	"github.com/ramseyjiang/go_senior_to_principle/pkg/utils"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,16 +20,44 @@ func GetDB() *gorm.DB {
 	return db
 }
 
+// getModels includes all database structs you want to migrate.
 func getModels() []interface{} {
-	return []interface{}{&models.User{}}
+	return []interface{}{
+		&models.User{},
+	}
 }
 
-func setupPostgres(gEnv *environment.Environment) (*gorm.DB, error) {
-	host := gEnv.C().Postgres.Host
-	port := gEnv.C().Postgres.Port
-	user := gEnv.C().Postgres.User
-	pwd := gEnv.C().Postgres.Pwd
-	dbName := gEnv.C().Postgres.DB
+// InitDB will return an instance of gorm.DB to an application.
+func InitDB() (err error) {
+	switch os.Getenv("DB_DRIVER") {
+	case utils.Mysql:
+		db, err = setupMySQL()
+	case utils.Postgres:
+		db, err = setupPostgres()
+	case utils.Sqlite:
+		db, err = setupSQLite()
+	default:
+		return fmt.Errorf("no database found, set the DB baseenv")
+	}
+
+	if err != nil {
+		return err
+	}
+
+	// after connect db, then do auto migrate.
+	if err = db.AutoMigrate(getModels()...); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return nil
+}
+
+func setupPostgres() (*gorm.DB, error) {
+	host := os.Getenv("POSTGRESQL_HOST")
+	port := os.Getenv("POSTGRESQL_PORT")
+	user := os.Getenv("POSTGRESQL_USER")
+	pwd := os.Getenv("POSTGRESQL_PWD")
+	dbName := os.Getenv("POSTGRESQL_DB")
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
 		host,
@@ -47,12 +75,12 @@ func setupPostgres(gEnv *environment.Environment) (*gorm.DB, error) {
 	return db, nil
 }
 
-func setupMySQL(gEnv *environment.Environment) (*gorm.DB, error) {
-	host := gEnv.C().Mysql.Host
-	port := gEnv.C().Mysql.Port
-	user := gEnv.C().Mysql.User
-	pwd := gEnv.C().Mysql.Pwd
-	dbName := gEnv.C().Mysql.DB
+func setupMySQL() (*gorm.DB, error) {
+	host := os.Getenv("MYSQL_HOST")
+	port := os.Getenv("MYSQL_PORT")
+	user := os.Getenv("MYSQL_USER")
+	pwd := os.Getenv("MYSQL_PWD")
+	dbName := os.Getenv("MYSQL_DB")
 
 	connStr := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
@@ -89,29 +117,4 @@ func setupSQLite() (*gorm.DB, error) {
 	}
 
 	return db, err
-}
-
-// InitDB will return an instance of gorm.DB to an application.
-func InitDB(gEnv *environment.Environment, dbType string) (err error) {
-	switch dbType {
-	case "mysql":
-		db, err = setupMySQL(gEnv)
-	case "postgres":
-		db, err = setupPostgres(gEnv)
-	case "sqlite":
-		db, err = setupSQLite()
-	default:
-		return fmt.Errorf("no database found, set the DB baseenv")
-	}
-
-	if err != nil {
-		return err
-	}
-
-	// after connect db, then do auto migrate.
-	if err = db.AutoMigrate(getModels()...); err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return nil
 }

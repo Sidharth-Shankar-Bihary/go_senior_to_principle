@@ -1,20 +1,27 @@
 package ctrls
 
 import (
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 )
 
 func TestCheckHealth(t *testing.T) {
-	RunAPITests(t, []APITestCase{
+	tests := []APITestCase{
 		{
 			tag:      "Health Check",
 			method:   "GET",
-			route:    "/api/health",
-			url:      "/api/health",
+			route:    "/health",
+			url:      "/health",
 			body:     `{"data":"Health is ok."}`,
-			function: CheckHealth,
+			function: h.CheckHealth,
 			status:   http.StatusOK,
 		},
-	})
+	}
+
+	for _, test := range tests {
+		resp := newTestAPI(router, test.method, test.route, test.url, test.function, test.body)
+		assert.Equal(t, test.status, resp.Code)
+		assert.JSONEq(t, test.body, resp.Body.String())
+	}
 }
