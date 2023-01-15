@@ -20,7 +20,8 @@ func (u *User) CreateUser(user *User, db *gorm.DB) (err error) {
 		return err
 	}
 
-	if err = db.Create(&user).Error; err != nil {
+	err = db.Create(&user).Error
+	if err != nil {
 		return err
 	}
 	return nil
@@ -48,7 +49,8 @@ func (u *User) GetUserByID(userID uint64, db *gorm.DB) (user *User, err error) {
 func (u *User) GetUserByName(username string, db *gorm.DB) (user *User, err error) {
 	user = &User{}
 	// Use where condition to get exactly result, if here use find only, using the login to check the current user will have wrong userInfo.
-	if err = db.Where("username=?", username).Find(&user).Error; err != nil {
+	err = db.Where("username=?", username).Find(&user).Error
+	if err != nil {
 		return nil, err
 	}
 	return

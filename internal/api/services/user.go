@@ -51,7 +51,6 @@ func (u *userService) VerifyPassword(password, hashedPassword string) error {
 
 func (u *userService) GetUserToken(rds *redis.Client, req LoginRequest) (resp *LoginResponse, err error) {
 	resp = &LoginResponse{}
-	user := &models.User{}
 
 	// valid request
 	if err = validator.New().Struct(req); err != nil {
@@ -60,7 +59,7 @@ func (u *userService) GetUserToken(rds *redis.Client, req LoginRequest) (resp *L
 		return
 	}
 
-	user, err = u.repo.GetUserByName(req.Username)
+	user, err := u.repo.GetUserByName(req.Username)
 	if err != nil || user.ID == 0 {
 		err = errors.New("user does not exit")
 		resp.Err = errors.New("user does not exit")

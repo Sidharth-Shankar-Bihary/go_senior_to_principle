@@ -2,10 +2,11 @@ package ctrls
 
 import (
 	"bytes"
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 type APITestCase struct {
