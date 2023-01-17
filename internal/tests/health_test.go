@@ -1,11 +1,12 @@
 package tests
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io"
 	"log"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHealth(t *testing.T) {
@@ -17,7 +18,7 @@ func TestHealth(t *testing.T) {
 
 	respBodyExpected := `{"data":"Health is ok."}`
 
-	byteBody, err := io.ReadAll(resp.Body)
+	byteBody, _ := io.ReadAll(resp.Body)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.JSONEq(t, respBodyExpected, string(byteBody))
 }
