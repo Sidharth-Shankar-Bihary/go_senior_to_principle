@@ -16,6 +16,8 @@ func Auth(e *env.Environment) gin.HandlerFunc {
 		accessTokenDetail, err := auth.ExtractTokenData(c)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, "unauthorized")
+			c.Abort()
+			return
 		}
 
 		userID, err := auth.FetchUIDFromRedis(accessTokenDetail, e.Redis)

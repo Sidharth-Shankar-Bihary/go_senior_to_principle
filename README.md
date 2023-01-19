@@ -22,8 +22,10 @@ In models folder, all go files are about database-related logic.
 In other words, it will hold all database structs. And models are only invoked by repos.
 
 In repos folder, all go files are about data logic, it means repo can be used to model, redis, kafka, and so on.
+Tests for repos are used the way of Suite Test. It includes BeforeSuite, Describe, AfterSuite.
 
 In services folder, all business logic are in it.
+Tests for services are used the way usual tests. It includes init, testClearUp.
 
 
 JWT_API_SECRET uses "% openssl rand -hex 32" to generate.

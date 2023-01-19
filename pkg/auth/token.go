@@ -124,7 +124,7 @@ func ExtractTokenData(c *gin.Context) (*AccessDetail, error) {
 func FetchUIDFromRedis(ad *AccessDetail, rds *redis.Client) (uint64, error) {
 	ctx := context.Background()
 	uid, err := rds.Get(ctx, ad.AccessUUID).Result()
-	if err != nil {
+	if err != nil || err != redis.Nil {
 		return 0, err
 	}
 

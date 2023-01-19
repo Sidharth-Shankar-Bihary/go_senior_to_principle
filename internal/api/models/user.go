@@ -1,7 +1,6 @@
 package models
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -15,25 +14,11 @@ type User struct {
 }
 
 func (u *User) CreateUser(user *User, db *gorm.DB) (err error) {
-	user.Password, err = u.HashPassword(user.Password)
-	if err != nil {
-		return err
-	}
-
 	err = db.Create(&user).Error
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-func (u *User) HashPassword(pwd string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-
-	return string(hashedPassword), nil
 }
 
 func (u *User) GetUserByID(userID uint64, db *gorm.DB) (user *User, err error) {

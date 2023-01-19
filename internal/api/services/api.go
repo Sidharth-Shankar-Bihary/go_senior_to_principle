@@ -3,14 +3,9 @@ package services
 import (
 	"github.com/go-redis/redis/v8"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/api/repos"
 	"go.uber.org/zap"
 )
-
-type UserRepo interface {
-	CreateUser(user *models.User) error
-	GetUserByID(id uint) (*models.User, error)
-	GetUserByName(username string) (*models.User, error)
-}
 
 type UserService interface {
 	CreateUser(req RegisterRequest) (*RegisterResponse, error)
@@ -20,7 +15,7 @@ type UserService interface {
 }
 
 type userService struct {
-	repo   UserRepo
+	repo   repos.UserRepo
 	logger *zap.Logger
 }
 

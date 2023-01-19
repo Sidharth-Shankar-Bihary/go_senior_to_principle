@@ -1,64 +1,104 @@
 package repos
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
-	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var dbTest *gorm.DB
-var err error
-var mockUserRepo *repo
+var (
+	dbTest       *gorm.DB
+	err          error
+	mockUserRepo *repo
+)
 
-func init() {
+func TestUserRepo(t *testing.T) {
+	// RegisterFailHandler is from the package gomega, it is used to connect Ginkgo with Gomega.
+	// When a matcher fails the fail handler passed into RegisterFailHandler is called.
+	RegisterFailHandler(Fail)
+	// RunSpecs is from the package ginkgo, RunSpecs is the entry point for the Ginkgo test runner
+	RunSpecs(t, "User Suite")
+}
+
+// BeforeSuite is from the package ginkgo
+var _ = BeforeSuite(func() {
+	// Init container, open connection, run migrations seed database, init repository
+	rand.Seed(time.Now().UnixNano())
 	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
 
 	logger := &zap.Logger{}
 	mockUserRepo, err = New(dbTest, logger)
-}
+})
 
-func TestRepo_CreateUser(t *testing.T) {
-	mockUser := &models.User{}
-	mockUser.Username = gofakeit.Username()
-	mockUser.Email = gofakeit.Email()
-	mockUser.Address = "test"
-	mockUser.Password = "12345678"
+var _ = Describe("Test the User repository", func() {
+	Context("Test Create User", func() {
+		When("A user info has been verified and filled, the request has been sent.", func() {
+			It("should return nil", func() {
+				mockUser := &models.User{}
+				mockUser.Username = "test"
+				mockUser.Email = gofakeit.Email()
+				mockUser.Address = "test"
+				mockUser.Password = "12345678"
+				result := mockUserRepo.CreateUser(mockUser)
 
-	result := mockUserRepo.CreateUser(mockUser)
-	assert.Equal(t, result, nil)
-}
+				Expect(result).Should(BeNil())
+			})
+		})
+	})
 
-func TestRepo_GetUserByID(t *testing.T) {
-	mockUser := &models.User{}
-	mockUser.ID = 6
+	Context("Test GetUserByID", func() {
+		When("when userID is 6", func() {
+			It("should return user info", func() {
+				mockUser := &models.User{}
+				mockUser.ID = 6
 
-	user, testErr := mockUserRepo.GetUserByID(uint(mockUser.ID))
-	assert.Equal(t, testErr, nil)
-	assert.Equal(t, user.ID, mockUser.ID)
-}
+				user, testErr := mockUserRepo.GetUserByID(uint(mockUser.ID))
 
-func TestRepo_GetUserByName(t *testing.T) {
-	mockUser := &models.User{}
+				Expect(testErr).Should(BeNil())
+				Expect(user.ID).Should(BeEquivalentTo(mockUser.ID))
+			})
+		})
+	})
 
-	// test a username does not exist
-	mockUser.Username = gofakeit.Username()
-	user1, testErr := mockUserRepo.GetUserByName(mockUser.Username)
-	assert.Equal(t, testErr, nil)
-	assert.Equal(t, user1.Username, "")
+	Context("Test GetUserByName", func() {
+		When("when a username does not exist", func() {
+			It("should return nil", func() {
+				mockUser := &models.User{}
+				// test a username does not exist
+				mockUser.Username = gofakeit.Username()
+				user, testErr := mockUserRepo.GetUserByName(mockUser.Username)
 
-	// test a username exists
-	mockUser.Username = "wq112"
-	user2, testErr := mockUserRepo.GetUserByName(mockUser.Username)
-	assert.Equal(t, testErr, nil)
-	assert.Equal(t, user2.Username, mockUser.Username)
-}
+				Expect(testErr).Should(BeNil())
+				Expect(user.Username).Should(BeEquivalentTo(""))
+			})
+		})
+	})
 
-func Test_CleanUp(t *testing.T) {
+	Context("Test GetUserByName", func() {
+		When("when a username exists", func() {
+			It("should return nil", func() {
+				mockUser := &models.User{}
+				// test a username does not exist
+				mockUser.Username = "test"
+				user, testErr := mockUserRepo.GetUserByName(mockUser.Username)
+
+				Expect(testErr).Should(BeNil())
+				Expect(user.Username).Should(BeEquivalentTo(mockUser.Username))
+			})
+		})
+	})
+})
+
+// Purge function destroys container
+var _ = AfterSuite(func() {
 	dbTest.Exec("delete from users where address=?", "test")
-}
+})
