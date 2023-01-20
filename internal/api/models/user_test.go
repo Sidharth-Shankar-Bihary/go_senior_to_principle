@@ -14,11 +14,11 @@ var dbTest *gorm.DB
 var err error
 
 func init() {
-	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
+	connStr := "host=localhost port=5432 user=root dbname=postgres password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
-	if err = dbTest.AutoMigrate([]interface{}{
+	if err = dbTest.AutoMigrate(
 		&User{},
-	}); err != nil {
+	); err != nil {
 		log.Fatal(err.Error())
 	}
 }
