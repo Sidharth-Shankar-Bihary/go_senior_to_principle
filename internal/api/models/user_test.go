@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/ramseyjiang/go_senior_to_principle/internal/db"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,7 +16,9 @@ var err error
 func init() {
 	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
-	if err = dbTest.AutoMigrate(db.GetModels()...); err != nil {
+	if err = dbTest.AutoMigrate([]interface{}{
+		&User{},
+	}); err != nil {
 		log.Fatal(err.Error())
 	}
 }
