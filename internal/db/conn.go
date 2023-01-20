@@ -20,8 +20,8 @@ func GetDB() *gorm.DB {
 	return db
 }
 
-// getModels includes all database structs you want to migrate.
-func getModels() []interface{} {
+// GetModels includes all database structs you want to migrate.
+func GetModels() []interface{} {
 	return []interface{}{
 		&models.User{},
 	}
@@ -45,7 +45,7 @@ func InitDB() (err error) {
 	}
 
 	// after connect db, then do auto migrate.
-	if err = db.AutoMigrate(getModels()...); err != nil {
+	if err = db.AutoMigrate(GetModels()...); err != nil {
 		log.Fatal(err.Error())
 	}
 

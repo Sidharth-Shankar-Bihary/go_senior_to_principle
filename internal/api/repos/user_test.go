@@ -1,6 +1,7 @@
 package repos
 
 import (
+	"log"
 	"math/rand"
 	"testing"
 	"time"
@@ -9,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/db"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,6 +36,9 @@ var _ = BeforeSuite(func() {
 	rand.Seed(time.Now().UnixNano())
 	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
+	if err = dbTest.AutoMigrate(db.GetModels()...); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	logger := &zap.Logger{}
 	mockUserRepo, err = New(dbTest, logger)

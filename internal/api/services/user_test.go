@@ -1,11 +1,13 @@
 package services
 
 import (
+	"log"
 	"net/http"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/repos"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/db"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -19,6 +21,9 @@ var mockUserService UserService
 func init() {
 	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
+	if err = dbTest.AutoMigrate(db.GetModels()...); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	logger := &zap.Logger{}
 	mockUserRepo, _ := repos.New(dbTest, logger)
