@@ -14,7 +14,7 @@ var dbTest *gorm.DB
 var err error
 
 func init() {
-	connStr := "host=localhost port=5432 user=root dbname=postgres password= sslmode=disable"
+	connStr := "host=localhost port=5432 user=root dbname=pro password= sslmode=disable"
 	dbTest, err = gorm.Open(postgres.Open(connStr))
 	if err = dbTest.AutoMigrate(
 		&User{},
@@ -25,7 +25,7 @@ func init() {
 
 func TestUser_CreateUser(t *testing.T) {
 	mockUser := &User{}
-	mockUser.Username = gofakeit.Username()
+	mockUser.Username = "test123"
 	mockUser.Email = gofakeit.Email()
 	mockUser.Address = "test"
 	mockUser.Password = "12345678"
@@ -53,7 +53,7 @@ func TestUser_GetUserByName(t *testing.T) {
 	assert.Equal(t, user1.Username, "")
 
 	// test a username exists
-	mockUser.Username = "wq112"
+	mockUser.Username = "test123"
 	user2, testErr := mockUser.GetUserByName(mockUser.Username, dbTest)
 	assert.Equal(t, user2.Username, mockUser.Username)
 	assert.Equal(t, testErr, nil)
