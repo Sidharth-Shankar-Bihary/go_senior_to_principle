@@ -9,12 +9,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis/v8"
 	"github.com/ramseyjiang/go_senior_to_principle/internal/api/models"
+	"github.com/ramseyjiang/go_senior_to_principle/internal/api/repos"
 	"github.com/ramseyjiang/go_senior_to_principle/pkg/auth"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func NewUserService(repo UserRepo, logger *zap.Logger) UserService {
+func NewUserService(repo repos.UserRepo, logger *zap.Logger) UserService {
 	return &userService{
 		repo:   repo,
 		logger: logger,
@@ -34,6 +35,7 @@ func (u *userService) CreateUser(req RegisterRequest) (resp *RegisterResponse, e
 
 	user.Username = html.EscapeString(strings.TrimSpace(req.Username))
 	user.Email = html.EscapeString(strings.TrimSpace(req.Email))
+	user.Password, _ = u.HashPassword(req.Password)
 	if err = u.repo.CreateUser(&user); err != nil {
 		resp.Err = err
 		resp.Status = http.StatusUnprocessableEntity
@@ -45,8 +47,17 @@ func (u *userService) CreateUser(req RegisterRequest) (resp *RegisterResponse, e
 	return
 }
 
-func (u *userService) VerifyPassword(password, hashedPassword string) error {
+func (u *userService) VerifyPassword(password string, hashedPassword string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+}
+
+func (u *userService) HashPassword(pwd string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hashedPassword), nil
 }
 
 func (u *userService) GetUserToken(rds *redis.Client, req LoginRequest) (resp *LoginResponse, err error) {
@@ -61,7 +72,6 @@ func (u *userService) GetUserToken(rds *redis.Client, req LoginRequest) (resp *L
 
 	user, err := u.repo.GetUserByName(req.Username)
 	if err != nil || user.ID == 0 {
-		err = errors.New("user does not exit")
 		resp.Err = errors.New("user does not exit")
 		resp.Status = http.StatusUnprocessableEntity
 		return
