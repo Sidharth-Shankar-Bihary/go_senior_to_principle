@@ -24,6 +24,7 @@ func GetDB() *gorm.DB {
 func GetModels() []interface{} {
 	return []interface{}{
 		&models.User{},
+		&models.Task{},
 	}
 }
 

@@ -29,7 +29,7 @@ func Serve(env *baseenv.Environment, services ...Closer) {
 	}
 
 	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(stopChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 	var ctxClosing context.Context
 	// if necessary, hot reload can be added at here.
 	select {
