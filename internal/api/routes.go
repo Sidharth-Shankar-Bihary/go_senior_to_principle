@@ -46,6 +46,12 @@ func NewRouter(gEnv *env.Environment, h *ctrls.Handler) *Router {
 	pubRoutes.POST("login", h.Login)
 	pubRoutes.POST("token/refresh", h.RefreshToken)
 
+	pubRoutes.POST("/task/create", h.CreateTask)
+	pubRoutes.GET("/task/:id", h.GetTask)
+	pubRoutes.PATCH("/task/update/:id", h.UpdateTask)
+	pubRoutes.DELETE("task/delete/:id", h.DeleteTask)
+	pubRoutes.GET("/tasks", h.GetAllTasks)
+
 	priRoutes := r.Group("/api/user/")
 	priRoutes.Use(middleware.Auth(gEnv))
 	priRoutes.POST("logout", h.Logout)
