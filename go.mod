@@ -1,6 +1,6 @@
 module github.com/ramseyjiang/go_senior_to_principle
 
-go 1.18
+go 1.19
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.20.1
