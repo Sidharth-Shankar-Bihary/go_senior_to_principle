@@ -62,3 +62,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli
+
+      - name: Build Golang application
+        run: go build -o app
