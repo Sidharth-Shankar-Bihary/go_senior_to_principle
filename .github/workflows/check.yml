@@ -57,3 +57,8 @@ jobs:
 
       - name: Run tests
         run: go test -race -vet=off ./...
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
