@@ -37,8 +37,8 @@ jobs:
       - name: Verify dependencies
         run: go mod verify
 
-      - name: Build Golang application
-        run: go build -v ./... -o app
+      - name: Build
+        run: go build -v ./...
 
       - name: Run go vet
         run: go vet ./...
@@ -62,3 +62,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y awscli
+
+      - name: Build Golang application
+        run: go build -o ./... app
