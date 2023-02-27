@@ -64,4 +64,6 @@ jobs:
           sudo apt-get install -y awscli
 
       - name: Build Golang application
-        run: go build -o ./... app
+        run: |
+          cd ../../cmd/pgusers/main.go
+          go build -o app
